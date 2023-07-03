@@ -1,4 +1,4 @@
-# IslandMapper
+# IslandMapper v0.1
 Compares a file of putative genomic island nucleotide fasta sequences against a genomic island database to identify similar islands
 
 System requirement: Linux, Python 3 (3.10 tested)
