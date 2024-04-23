@@ -61,9 +61,7 @@ if not os.path.exists(output+'temp/json'):
     os.makedirs(output+'temp/json')
 if not os.path.exists(output+'genome'):
     os.makedirs(output+'genome')
-#output GI table
-outputtable=output+'GI.tsv'
-outputtable_removed=output+'removed_GI.tsv'
+outputtable=output+'GI.tsv' #output GI table
 
 #Main program
 if __name__=='__main__':
@@ -145,9 +143,6 @@ if __name__=='__main__':
                 repeat_count+=1
     repeats=maximize_repeats(repeats,mismatch)
     repeats=remove_small_GI(repeats)
-    separate_results=separate_repeats(repeats)
-    repeats_removed=separate_results[1]
-    repeats=separate_results[0]
     print('==========GIs calculated==========')
     print(datetime.datetime.now())
 
@@ -167,14 +162,6 @@ if __name__=='__main__':
                     fastf.write('>'+'GI_'+str(gi)+'\n')
                     fastf.write(get_sequence(genome_sequence,repeats[repfkey][2][2],start_gi,end_gi))
                 gi+=1
-    with open(outputtable_removed,'w') as fo_removed:
-        if len(repeats_removed.keys())==0:
-            fo_removed.write('nothing found')
-        else:
-            fo_removed.write('GI_num\trepeat_type\tintegrase_name\tcontig\tintegrase_start\tintegrase_end\tGI_start\tGI_end\n')
-            gi_removed=1
-            for repfkey_removed in repeats_removed.keys():
-                fo_removed.write('GI_removed_'+str(gi_removed)+'\t'+'\t'.join(repeats_removed[repfkey_removed][2])+'\n')
     print('==========PUTATIVE GENOMIC ISLANDS CALCULATED==========')
     print(datetime.datetime.now())
 
@@ -193,7 +180,12 @@ if __name__=='__main__':
         print(datetime.datetime.now())
         with open(output + 'temp/GI/' + GI, 'r') as gi_count:
             gi_list = gi_count.readlines()[1]
-            subprocess.run(
+            if len(gi_list) >= 20000:
+                subprocess.run(
+                    'prodigal -i ' + output + 'temp/GI/' + GI + ' -a ' + output + 'temp/proteins/' + GI + ' -o ' +
+                    output + 'temp/proteins/' + GI + '.gff -q', shell=True)
+            else:
+                subprocess.run(
                     'prodigal -i ' + output + 'temp/GI/' + GI + ' -a ' + output + 'temp/proteins/' + GI + ' -o ' +
                     output + 'temp/proteins/' + GI + '.gff -q -p meta', shell=True)
         if os.path.exists(output + 'temp/proteins/' + GI):
@@ -255,14 +247,14 @@ if __name__=='__main__':
         fo2=open(output + GI2[:-6] + '_result.txt', 'a')
         fo2.write('GI\tname\taccession\thit_score\tcomplete_score\ttotal_score\n')
         for key_o in compare_result[GI2].keys():
-            fo2.write(key_o[:-5] + '\t'  + compare_result[GI2][key_o]['name'] \
+            fo2.write(key_o[:-5] + '\t'  + '\t' + compare_result[GI2][key_o]['name'] \
                                  + '\t' + compare_result[GI2][key_o]['accession'] + '\t' + str(
                             compare_result[GI2][key_o]['hit_score']) + \
                                  '\t' + str(compare_result[GI2][key_o]['complete_score']) + '\t' + str(
                             compare_result[GI2][key_o]['total_score']) + '\n')
     list1 = os.listdir(output)
     output_final = open(output+'compiled_results.tsv', 'w')
-    output_final.write('GI_input\tGI\tname\taccession\thit_score\tcomplete_score\ttotal_score\n')
+    output_final.write('GI_input\tGI\tgitype\tname\taccession\thit_score\tcomplete_score\ttotal_score\n')
     output_list=[]
     for item1 in list1:
         if '_result.txt' in item1:

@@ -554,43 +554,6 @@ def maximize_repeats(repeats,mismatch):
     repeat_out=remove_small_GI(repeat_out)
     return repeat_out
 
-# Remove GIs that are completely contained in other GIs
-# Removed GIs are going to be kept in a different file
-# Kept GIs will be used for downstream analysis
-def separate_repeats(repeats):
-    repeat_kept={}
-    repeat_removed={}
-    key_list=repeats.keys()
-    kept_list=[]
-    for key_repeat in key_list:
-        kept_list.append(key_repeat)
-    removed_list=[]
-    working_list=[]
-    kept=0
-    while kept==0:
-        kept=1
-        working_list=kept_list
-        flag=1
-        for key in working_list:
-            for key2 in working_list:
-                repeat1_left=int(repeats[key][2][5])
-                repeat1_right=int(repeats[key][2][6])
-                repeat2_left = int(repeats[key2][2][5])
-                repeat2_right = int(repeats[key2][2][6])
-                if repeat1_left>repeat2_left and repeat1_right<repeat2_right:
-                    kept=0
-                    kept_list.remove(key)
-                    removed_list.append(key)
-                    flag=0
-                    break
-            if flag==0:
-                break
-    for repeat1 in kept_list:
-        repeat_kept[repeat1]=repeats[repeat1]
-    for repeat2 in removed_list:
-        repeat_removed[repeat2]=repeats[repeat2]
-    return repeat_kept, repeat_removed
-
 # Obtain sequences from the contig number, first base number, last base number
 def get_sequence(genome,contig,start,end):
     if start>end:
